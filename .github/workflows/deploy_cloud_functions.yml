@@ -5,6 +5,10 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    # Add "id-token" with the intended permissions.   
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: checkout to github Repository
         uses: actions/checkout@v2
