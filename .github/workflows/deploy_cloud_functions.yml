@@ -21,15 +21,9 @@ jobs:
         with:
           #  name: the name of our cloud function on cloud, this can be anything you want
           name: print_hello_world
-          description: Test nodejs cloud function # nullable
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          # region: us-central1
-          # source_dir (Optional) Source directory for the function. Defaults to current directory.
-          # source_dir: 
-          # name of our function in our main.py file, defaults to the resource name suffix 
           entry_point: app
           # runtime to use for the function
-          runtime: nodejs14
+          runtime: nodejs16
           # the function execution timeout
           timeout: 60
           # the maximum number of instances for the function.
