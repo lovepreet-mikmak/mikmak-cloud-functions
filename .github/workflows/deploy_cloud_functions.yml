@@ -23,7 +23,7 @@ jobs:
           name: print_hello_world
           description: Test nodejs cloud function # nullable
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          region: us-central1
+          # region: us-central1
           # source_dir (Optional) Source directory for the function. Defaults to current directory.
           # source_dir: 
           # name of our function in our main.py file, defaults to the resource name suffix 
