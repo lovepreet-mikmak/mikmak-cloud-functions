@@ -8,10 +8,13 @@ jobs:
     steps:
       - name: checkout to github Repository
         uses: actions/checkout@v2
-      - name: Cloud Functions Deploy
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'  
+      - id: 'deploy'
         uses: google-github-actions/deploy-cloud-functions@v0
         with:
-          credentials: ${{ secrets.GCP_SA_KEY }}
           #  name: the name of our cloud function on cloud, this can be anything you want
           name: print_hello_world
           description: Test nodejs cloud function # nullable
