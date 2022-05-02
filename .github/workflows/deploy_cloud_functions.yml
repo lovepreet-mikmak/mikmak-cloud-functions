@@ -20,7 +20,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloud-functions@v0.4.0'
         with:
         #(Required) Name of the Cloud Function.
-          name: 'my-function'
+          name: hello_world
           runtime: 'nodejs16'
           entry_point: app
           project_id: ${{ secrets.GCP_PROJECT_ID }}
