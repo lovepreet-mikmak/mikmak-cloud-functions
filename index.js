@@ -1,11 +1,13 @@
-const express = require("express");
-const app =  express();
-app.get("/",(req, res)=>{
-    const msg = req.query.message || "hello world";
-        res.status(200).json({message: msg});
-    })
-app.get("/new",(req, res)=>{
-    const msg = req.query.message || "new msg";
-        res.status(200).json({message: msg});
-    })
-exports.app =  app;
+/**
+ * Triggered from a message on a Cloud Pub/Sub topic.
+ *
+ * @param {!Object} event Event payload.
+ * @param {!Object} context Metadata for the event.
+ */
+ exports.helloPubSub = (event, context) => {
+    const message = event.data
+      ? Buffer.from(event.data, 'base64').toString()
+      : 'Hello, World';
+    console.log(message);
+  };
+  
