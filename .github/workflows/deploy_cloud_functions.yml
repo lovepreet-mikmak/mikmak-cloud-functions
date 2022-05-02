@@ -20,7 +20,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloud-functions@v0.4.0'
         with:
         #(Required) Name of the Cloud Function.
-          name: pub/sub_hello_world_example
+          name: pub_sub_hello_world_example
           runtime: 'nodejs16'
           entry_point: helloPubSub
           event_trigger_type: providers/cloud.pubsub/eventTypes/topic.publish
