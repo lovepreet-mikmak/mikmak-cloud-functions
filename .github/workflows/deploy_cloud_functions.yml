@@ -25,7 +25,7 @@ jobs:
           entry_point: helloPubSub
           event_trigger_type: providers/cloud.pubsub/eventTypes/topic.publish
           event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/${{ secrets.GCP_PROJECT_TOPIC_ID }}
-          event_trigger_service: pubsub.googleapis.com
+          # event_trigger_service: pubsub.googleapis.com
         #  project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       # Example of using the output
