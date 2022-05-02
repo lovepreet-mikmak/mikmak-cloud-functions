@@ -23,8 +23,8 @@ jobs:
           name: pub/sub_hello_world_example
           runtime: 'nodejs16'
           entry_point: helloPubSub
-          event_trigger_type: google.pubsub.topic.publish
-          event_trigger_resource: projects/$secrets.GCP_PROJECT_ID/topics/$secrets.GCP_PROJECT_TOPIC_ID
+          event_trigger_type: providers/cloud.pubsub/eventTypes/topic.publish
+          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/${{ secrets.GCP_PROJECT_TOPIC_ID }}
           event_trigger_service: pubsub.googleapis.com
         #  project_id: ${{ secrets.GCP_PROJECT_ID }}
 
