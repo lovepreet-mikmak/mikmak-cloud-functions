@@ -12,6 +12,6 @@ var a = new Date();
       console.log("event---", event, "timestamp---", context.timestamp);
     console.log("message is---", message);
     console.log("diff is",new Date(context.timestamp)-a);
-    a= new Date(cotext.timestamp);
+    a= new Date(context.timestamp);
   };
   
