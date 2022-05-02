@@ -23,6 +23,7 @@ jobs:
           name: 'my-function'
           runtime: 'nodejs16'
           entry_point: app
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       # Example of using the output
       - id: 'test'
