@@ -8,6 +8,7 @@
     const message = event.data
       ? Buffer.from(event.data, 'base64').toString()
       : 'Hello, World';
-    console.log(message);
+      console.log("event---", event, "context---", context);
+    console.log("message is---", message);
   };
   
