@@ -11,23 +11,17 @@ jobs:
       id-token: 'write'
     steps:
       - name: checkout to github Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - id: 'auth'
         uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'  
       - id: 'deploy'
-        uses: google-github-actions/deploy-cloud-functions@v0
+        uses: 'google-github-actions/deploy-cloud-functions@v0'
         with:
-          #  name: the name of our cloud function on cloud, this can be anything you want
-          name: print_hello_world
-          entry_point: app
-          # runtime to use for the function
-          runtime: nodejs16
-          # the function execution timeout
-          timeout: 60
-          # the maximum number of instances for the function.
-          max_instances: 1
-          # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
-          # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
-  #       env_vars: # optional
+          name: 'my-function'
+          runtime: 'nodejs16'
+
+      # Example of using the output
+      - id: 'test'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
