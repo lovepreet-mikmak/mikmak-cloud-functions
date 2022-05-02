@@ -19,8 +19,10 @@ jobs:
       - id: 'deploy'
         uses: 'google-github-actions/deploy-cloud-functions@v0'
         with:
+        #(Required) Name of the Cloud Function.
           name: 'my-function'
           runtime: 'nodejs16'
+          entry_point: app
 
       # Example of using the output
       - id: 'test'
