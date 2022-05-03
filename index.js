@@ -5,6 +5,7 @@
  * @param {!Object} context Metadata for the event.
  */
 require("dotenv").config();
+console.log("process.env--",process.env);
 var lastTimestamp = process.env.lastTimestamp;
 exports.helloPubSub = (event, context) => {
     const message = event.data
