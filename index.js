@@ -4,6 +4,7 @@
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
+require("dotenv").config();
 var lastTimestamp = process.env.lastTimestamp;
 exports.helloPubSub = (event, context) => {
     const message = event.data
@@ -12,7 +13,7 @@ exports.helloPubSub = (event, context) => {
     console.log("event---", event, "timestamp---", context.timestamp);
     console.log("message is---", message);
     if (lastTimestamp) {
-        console.log("The difference is ---", new Date(context.timestamp)- new Date(lastTimestamp));
+        console.log("The difference is ---", new Date(context.timestamp) - new Date(lastTimestamp));
     } else{
         console.log("This is first call");
     }

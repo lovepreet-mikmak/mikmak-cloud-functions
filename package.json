@@ -13,6 +13,7 @@
     "@google-cloud/functions-framework": "^3.1.1"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^2.19.3"
+    "@google-cloud/pubsub": "^2.19.3",
+    "dotenv": "^16.0.0"
   }
 }
