@@ -4,14 +4,18 @@
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-var a = new Date();
- exports.helloPubSub = (event, context) => {
+var lastTimestamp = process.env.lastTimestamp;
+exports.helloPubSub = (event, context) => {
     const message = event.data
-      ? Buffer.from(event.data, 'base64').toString()
-      : 'Hello, World';
-      console.log("event---", event, "timestamp---", context.timestamp);
+        ? Buffer.from(event.data, 'base64').toString()
+        : 'Hello, World';
+    console.log("event---", event, "timestamp---", context.timestamp);
     console.log("message is---", message);
-    console.log("diff is",new Date(context.timestamp)-a);
-    a= new Date(context.timestamp);
-  };
-  
+    if (lastTimestamp) {
+        console.log("The difference is ---", new Date(context.timestamp)- new Date(lastTimestamp));
+    } else{
+        console.log("This is first call");
+    }
+    process.env.lastTimestamp = context.timestamp;
+    
+};
