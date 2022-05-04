@@ -15,6 +15,6 @@
   },
   "dependencies": {
     "@google-cloud/pubsub": "^2.19.3",
-    "dotenv": "^16.0.0"
+    "firebase-admin": "^10.1.0"
   }
 }
