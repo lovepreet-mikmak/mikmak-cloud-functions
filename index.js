@@ -6,26 +6,26 @@
  */
 require("dotenv").config();
 const fs = require("fs");
-console.log("process.env--",process.env.lastTimestamp);
-const lastTimestamp = process.env.lastTimestamp;
+const lastTimestamp = require("./constants.js").lastTimestamp;
+console.log("lastTimestamp--", lastTimestamp);
 exports.helloPubSub = (event, context) => {
     const message = event.data
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
-    console.log("event---", event, "timestamp---", context.timestamp);
+    console.log("timestamp---", lastTimestamp);
     console.log("message is---", message);
     if (lastTimestamp) {
 
         console.log("The difference is ---", new Date(context.timestamp) - new Date(lastTimestamp));
-    } else{
+    } else {
         console.log("This is first Time execution call");
     }
-    fs.writeFile(".env", `lastTimestamp=${context.timestamp}`, function(err, data){
-        if(err){
+    fs.writeFile("constants.js", `module.exports.lastTimestamp='${context.timestamp}';`, function (err, data) {
+        if (err) {
             console.log("error occured while writing file--", err);
-        } else{
+        } else {
             console.log("file written successfully--", data);
         }
     })
-    
+
 };
