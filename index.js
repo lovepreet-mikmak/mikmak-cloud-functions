@@ -6,12 +6,9 @@
  */
 require("dotenv").config();
 const fs = require("fs");
-const path = require("path");
 console.log("process.env--",process.env.lastTimestamp);
 const lastTimestamp = process.env.lastTimestamp;
 exports.helloPubSub = (event, context) => {
-    const filePath =  path.resolve(__dirname,".env");
-    console.log("filePath--", filePath);
     const message = event.data
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
@@ -23,7 +20,7 @@ exports.helloPubSub = (event, context) => {
     } else{
         console.log("This is first Time execution call");
     }
-    fs.writeFile(filePath, `lastTimestamp=${context.timestamp}`, function(err, data){
+    fs.writeFile(".env", `lastTimestamp=${context.timestamp}`, function(err, data){
         if(err){
             console.log("error occured while writing file--", err);
         } else{
