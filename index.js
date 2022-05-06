@@ -99,6 +99,7 @@ exports.helloPubSub = async (event, context) => {
         } else {
             const oldContent = await readFile(bucketName, fileName);
             console.log("oldContent---", oldContent);
+            console.log("Time Interval since last Trigger---", `${new Date(content.timestamp) - new Date(oldContent)} ms` )
             updateFile(bucketName, fileName, content);
         }
     }
