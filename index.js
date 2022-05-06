@@ -68,7 +68,13 @@ const readFile = async (bucketName = "", fileName = "") => {
         const contents = await storage.bucket(bucketName).file(fileName).download();
 
         console.log(`Contents of gs://${bucketName}/${fileName} are ${contents.toString()}`);
-        return contents.toString().slice(contents.toString().indexOf("lastTimestamp=") + 14);
+        const index = contents.toString().indexOf("lastTimestamp=");
+        if (index >= 0) {
+            return contents.toString().slice(index + 14);
+        } else {
+            return null;
+        }
+
     } catch (error) {
         console.log("error while reading remote file:-", error);
         return false;
@@ -98,8 +104,13 @@ exports.helloPubSub = async (event, context) => {
             createFile(bucketName, fileName, content);
         } else {
             const oldContent = await readFile(bucketName, fileName);
-            console.log("oldContent---", oldContent);
-            console.log("Time Interval since last Trigger---", `${new Date(content.timestamp) - new Date(oldContent)} ms` )
+            if (oldContent) {
+                console.log("oldContent---", oldContent);
+                console.log("Time Interval since last Trigger---", `${new Date(content.timestamp) - new Date(oldContent)} ms`)
+            }
+            else {
+                console.log(`This is the first time,when ${fileName} file is created`);
+            }
             updateFile(bucketName, fileName, content);
         }
     }
