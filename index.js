@@ -64,7 +64,7 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
 }
 
 exports.helloPubSub = async(event, context) => {
-    const bucketName = "bucket1";
+    const bucketName = "bucket-mikmak-event-api-hello-world";
     const fileName = "logs.txt";
     const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
