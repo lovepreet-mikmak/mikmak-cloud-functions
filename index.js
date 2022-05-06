@@ -4,8 +4,8 @@ const checkBucketExistence = async (name = "") => {
     try {
         const [buckets] = await storage.getBuckets();
 
-        // console.log('Buckets:', buckets);
-        return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
+        console.log('Buckets:', buckets[0]);
+        // return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
     }
     catch (error) {
         console.log("error occured during fetching buckets list:-", error);
