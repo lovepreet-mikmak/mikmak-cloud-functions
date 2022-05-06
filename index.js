@@ -62,17 +62,13 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
         return false;
     }
 };
-const readFile =  (bucketName="", fileName="") => {
+const readFile = async (bucketName = "", fileName = "") => {
     try {
-        return  storage.bucket(bucketName).file(fileName).createReadStream()
-            .on('error', function (err) { })
-            .on('response', function (response) {
-                // Server connected and responded with the specified status and headers.
-                console.log("response---", response);
-            })
-            .on('end', function () {
-                // The file is fully downloaded.
-            })
+        // Downloads the file into a buffer in memory.
+        const contents = await storage.bucket(bucketName).file(fileName).download();
+
+        console.log(`Contents of gs://${bucketName}/${fileName} are ${contents.toString()}`);
+        return contents.toString().slice(contents.toString().indexOf("lastTimestamp=") + 14);
     } catch (error) {
         console.log("error while reading remote file:-", error);
         return false;
@@ -101,7 +97,7 @@ exports.helloPubSub = async (event, context) => {
         if (!isFile) {
             createFile(bucketName, fileName, content);
         } else {
-            const oldContent =  await readFile(bucketName, fileName);
+            const oldContent = await readFile(bucketName, fileName);
             console.log("oldContent---", oldContent);
             updateFile(bucketName, fileName, content);
         }
