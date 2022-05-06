@@ -62,9 +62,9 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
         return false;
     }
 };
-const readFile =  async (bucketName="", fileName="") => {
+const readFile =  (bucketName="", fileName="") => {
     try {
-        return await storage.bucket(bucketName).file(fileName).createReadStream()
+        return  storage.bucket(bucketName).file(fileName).createReadStream()
             .on('error', function (err) { })
             .on('response', function (response) {
                 // Server connected and responded with the specified status and headers.
