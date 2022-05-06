@@ -1,3 +1,4 @@
+const moment = require('moment');
 const { Storage } = require('@google-cloud/storage');
 const storage = new Storage();
 const checkBucketExistence = async (name = "") => {
@@ -106,7 +107,8 @@ exports.helloPubSub = async (event, context) => {
             const oldContent = await readFile(bucketName, fileName);
             if (oldContent) {
                 console.log("oldContent---", oldContent);
-                console.log("Time Interval since last Trigger---", `${new Date(context.timestamp) - new Date(oldContent)} ms`)
+                const diff = moment(oldContent).from(moment(context.timestamp))
+                console.log("Time Interval since last Trigger---", diff);
             }
             else {
                 console.log(`This is the first time,when ${fileName} file is created`);

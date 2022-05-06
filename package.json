@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@google-cloud/pubsub": "^2.19.3",
-    "@google-cloud/storage": "^5.19.4"
+    "@google-cloud/storage": "^5.19.4",
+    "moment": "^2.29.3"
   }
 }
