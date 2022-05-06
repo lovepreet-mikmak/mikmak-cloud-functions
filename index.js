@@ -12,7 +12,7 @@ const checkBucketExistence = async (name = "") => {
         return false;
     }
 };
-const createBucket = async (name = "", fileName = "", content = "") => {
+const createBucket = async (name = "") => {
     // Creates the new bucket
     try {
         await storage.createBucket(name);
@@ -64,14 +64,14 @@ exports.helloPubSub = (event, context) => {
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
-    checkBucketExistence(bucketName);
-    // const isBucket = checkBucketExistence(bucketName);
-    // if (!isBucket) {
-    //     const bucketAdded = createBucket(bucketName, fileName, content);
-    //     if (bucketAdded) {
-    //         createFile(bucketName, fileName, content);
-    //     }
-    // } else {
+    const isBucket = checkBucketExistence(bucketName);
+    if (!isBucket) {
+        const bucketAdded = createBucket(bucketName);
+        // if (bucketAdded) {
+        //     createFile(bucketName, fileName, content);
+        // }
+    } 
+    // else {
     //     const isFile = checkFileExistence(bucketName, fileName);
     //     if (!isFile) {
     //         createFile(bucketName, fileName, content);
