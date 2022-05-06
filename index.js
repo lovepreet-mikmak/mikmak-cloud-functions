@@ -101,7 +101,7 @@ exports.helloPubSub = async (event, context) => {
         if (!isFile) {
             createFile(bucketName, fileName, content);
         } else {
-            const oldContent =  readFile(bucketName, fileName);
+            const oldContent =  await readFile(bucketName, fileName);
             console.log("oldContent---", oldContent);
             updateFile(bucketName, fileName, content);
         }
