@@ -75,7 +75,7 @@ exports.helloPubSub = async(event, context) => {
     console.log("isBucket---",isBucket);
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
-        conaole.log("bucketAdded---", bucketAdded);
+        console.log("bucketAdded---", bucketAdded);
         if (bucketAdded) {
             console.log("yes---");
             // createFile(bucketName, fileName, content);
