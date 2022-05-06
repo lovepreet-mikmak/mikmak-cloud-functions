@@ -5,13 +5,13 @@ const checkBucketExistence = async (name = "") => {
         const [buckets] = await storage.getBuckets();
 
         // console.log('Buckets:', buckets);
-        const isBucket= false;
+        let isBucket = false;
         buckets.forEach(bucket => {
-            if(bucket.name===name){
-                isBucket= true;
+            if (bucket.name === name) {
+                isBucket = true;
             }
-          });
-          return isBucket;
+        });
+        return isBucket;
         // return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
     }
     catch (error) {
@@ -63,7 +63,7 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
     }
 }
 
-exports.helloPubSub = async(event, context) => {
+exports.helloPubSub = async (event, context) => {
     const bucketName = "bucket-mikmak-event-api-hello-world";
     const fileName = "logs.txt";
     const content = `lastTimestamp=${context.timestamp}`
@@ -72,14 +72,14 @@ exports.helloPubSub = async(event, context) => {
         : 'Hello, World';
     console.log("message is---", message);
     const isBucket = await checkBucketExistence(bucketName);
-    console.log("isBucket---",isBucket);
+    console.log("isBucket---", isBucket);
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         console.log("bucketAdded---", bucketAdded);
         if (bucketAdded) {
             createFile(bucketName, fileName, content);
         }
-    } 
+    }
     else {
         const isFile = await checkFileExistence(bucketName, fileName);
         if (!isFile) {
