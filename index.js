@@ -5,14 +5,14 @@ const checkBucketExistence = async (name = "") => {
         const [buckets] = await storage.getBuckets();
 
         // console.log('Buckets:', buckets);
-        let isBucket = false;
-        buckets.forEach(bucket => {
-            if (bucket.name === name) {
-                isBucket = true;
-            }
-        });
-        return isBucket;
-        // return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
+        // let isBucket = false;
+        // buckets.forEach(bucket => {
+        //     if (bucket.name === name) {
+        //         isBucket = true;
+        //     }
+        // });
+        // return isBucket;
+        return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
     }
     catch (error) {
         console.log("error occured during fetching buckets list:-", error);
@@ -34,7 +34,7 @@ const createBucket = async (name = "") => {
 const checkFileExistence = async (bucketName = "", fileName = "") => {
     const [files] = await storage.bucket(bucketName).getFiles();
 
-    console.log("Files:", files);
+    // console.log("Files:", files);
     return files.findIndex(file => file.name === fileName) >= 0 ? true : false;;
 }
 const createFile = async (bucketName = "", fileName = "", content = "") => {
