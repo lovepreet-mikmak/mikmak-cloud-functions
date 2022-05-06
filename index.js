@@ -63,7 +63,7 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
     }
 }
 
-exports.helloPubSub = (event, context) => {
+exports.helloPubSub = async(event, context) => {
     const bucketName = "bucket1";
     const fileName = "logs.txt";
     const content = `lastTimestamp=${context.timestamp}`
@@ -71,16 +71,16 @@ exports.helloPubSub = (event, context) => {
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
-    const isBucket = checkBucketExistence(bucketName);
+    const isBucket = await checkBucketExistence(bucketName);
     console.log("isBucket---",isBucket);
-    if (!isBucket) {
-        const bucketAdded = createBucket(bucketName);
-        conaole.log("bucketAdded---", bucketAdded);
-        if (bucketAdded) {
-            console.log("yes---");
-            // createFile(bucketName, fileName, content);
-        }
-    } 
+    // if (!isBucket) {
+    //     const bucketAdded = createBucket(bucketName);
+    //     conaole.log("bucketAdded---", bucketAdded);
+    //     if (bucketAdded) {
+    //         console.log("yes---");
+    //         // createFile(bucketName, fileName, content);
+    //     }
+    // } 
     // else {
     //     const isFile = checkFileExistence(bucketName, fileName);
     //     if (!isFile) {
