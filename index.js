@@ -4,7 +4,7 @@ const checkBucketExistence = async (name = "") => {
     try {
         const [buckets] = await storage.getBuckets();
 
-        console.log('Buckets:', buckets);
+        // console.log('Buckets:', buckets);
         return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
     }
     catch (error) {
