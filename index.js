@@ -67,9 +67,10 @@ exports.helloPubSub = (event, context) => {
     const isBucket = checkBucketExistence(bucketName);
     if (!isBucket) {
         const bucketAdded = createBucket(bucketName);
-        // if (bucketAdded) {
-        //     createFile(bucketName, fileName, content);
-        // }
+        if (bucketAdded) {
+            console.log("yes---");
+            // createFile(bucketName, fileName, content);
+        }
     } 
     // else {
     //     const isFile = checkFileExistence(bucketName, fileName);
