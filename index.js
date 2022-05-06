@@ -61,6 +61,22 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
         console.log("error while updating file:-", error);
         return false;
     }
+};
+const readFile =  async (bucketName="", fileName="") => {
+    try {
+        return await storage.bucket(bucketName).file(fileName).createReadStream()
+            .on('error', function (err) { })
+            .on('response', function (response) {
+                // Server connected and responded with the specified status and headers.
+                console.log("response---", response);
+            })
+            .on('end', function () {
+                // The file is fully downloaded.
+            })
+    } catch (error) {
+        console.log("error while reading remote file:-", error);
+        return false;
+    }
 }
 
 exports.helloPubSub = async (event, context) => {
@@ -85,6 +101,8 @@ exports.helloPubSub = async (event, context) => {
         if (!isFile) {
             createFile(bucketName, fileName, content);
         } else {
+            const oldContent =  readFile(bucketName, fileName);
+            console.log("oldContent---", oldContent);
             updateFile(bucketName, fileName, content);
         }
     }
