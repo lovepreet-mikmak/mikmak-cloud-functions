@@ -64,19 +64,19 @@ exports.helloPubSub = (event, context) => {
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
-
-    const isBucket = checkBucketExistence(bucketName);
-    if (!isBucket) {
-        const bucketAdded = createBucket(bucketName, fileName, content);
-        if (bucketAdded) {
-            createFile(bucketName, fileName, content);
-        }
-    } else {
-        const isFile = checkFileExistence(bucketName, fileName);
-        if (!isFile) {
-            createFile(bucketName, fileName, content);
-        } else {
-            updateFile(bucketName, fileName, content);
-        }
-    }
+    checkBucketExistence(bucketName);
+    // const isBucket = checkBucketExistence(bucketName);
+    // if (!isBucket) {
+    //     const bucketAdded = createBucket(bucketName, fileName, content);
+    //     if (bucketAdded) {
+    //         createFile(bucketName, fileName, content);
+    //     }
+    // } else {
+    //     const isFile = checkFileExistence(bucketName, fileName);
+    //     if (!isFile) {
+    //         createFile(bucketName, fileName, content);
+    //     } else {
+    //         updateFile(bucketName, fileName, content);
+    //     }
+    // }
 };
