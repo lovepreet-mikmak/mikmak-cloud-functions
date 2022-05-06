@@ -106,7 +106,7 @@ exports.helloPubSub = async (event, context) => {
             const oldContent = await readFile(bucketName, fileName);
             if (oldContent) {
                 console.log("oldContent---", oldContent);
-                console.log("Time Interval since last Trigger---", `${new Date(content.timestamp) - new Date(oldContent)} ms`)
+                console.log("Time Interval since last Trigger---", `${new Date(context.timestamp) - new Date(oldContent)} ms`)
             }
             else {
                 console.log(`This is the first time,when ${fileName} file is created`);
