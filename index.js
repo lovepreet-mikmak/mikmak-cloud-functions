@@ -1,18 +1,36 @@
 const moment = require('moment');
 const { Storage } = require('@google-cloud/storage');
+const { BigQuery } = require('@google-cloud/bigquery');
+const bigquery = new BigQuery();
 const storage = new Storage();
+const query = async () => {
+    // Queries the U.S. given names dataset for the state of Texas.
+    select * from 
+    const query = `SELECT *
+      FROM \`ampl.mikmak_retailers\`
+      LIMIT 100`;
+
+    // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
+    const options = {
+        query: query,
+        // Location must match that of the dataset(s) referenced in the query.
+        location: 'US',
+    };
+
+    // Run the query as a job
+    const [job] = await bigquery.createQueryJob(options);
+    console.log(`Job ${job.id} started.`);
+
+    // Wait for the query to finish
+    const [rows] = await job.getQueryResults();
+
+    // Print the results
+    console.log('Rows:');
+    rows.forEach(row => console.log(row));
+}
 const checkBucketExistence = async (name = "") => {
     try {
         const [buckets] = await storage.getBuckets();
-
-        // console.log('Buckets:', buckets);
-        // let isBucket = false;
-        // buckets.forEach(bucket => {
-        //     if (bucket.name === name) {
-        //         isBucket = true;
-        //     }
-        // });
-        // return isBucket;
         return buckets.findIndex(bucket => bucket.name === name) >= 0 ? true : false;
     }
     catch (error) {
@@ -90,11 +108,10 @@ exports.helloPubSub = async (event, context) => {
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
+    query();
     const isBucket = await checkBucketExistence(bucketName);
-    console.log("isBucket---", isBucket);
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
-        console.log("bucketAdded---", bucketAdded);
         if (bucketAdded) {
             createFile(bucketName, fileName, content);
         }
@@ -106,7 +123,6 @@ exports.helloPubSub = async (event, context) => {
         } else {
             const oldContent = await readFile(bucketName, fileName);
             if (oldContent) {
-                console.log("oldContent---", oldContent);
                 const diff = moment(oldContent).from(moment(context.timestamp))
                 console.log("Time Interval since last Trigger---", diff);
             }
