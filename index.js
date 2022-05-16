@@ -7,7 +7,7 @@ const query = async () => {
     // Queries the U.S. given names dataset for the state of Texas.
     const query = `SELECT *
       FROM ampl.mikmak_retailers
-      LIMIT 100`;
+      LIMIT 1`;
 
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
@@ -25,7 +25,7 @@ const query = async () => {
 
     // Print the results
     console.log('Rows:');
-    rows.forEach(row => console.log(row));
+    rows.forEach(row => console.log("row--", row));
 }
 const checkBucketExistence = async (name = "") => {
     try {
