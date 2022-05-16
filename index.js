@@ -160,8 +160,9 @@ const readFile = async (bucketName = "", fileName = "") => {
  * @param {*} bucketName The name of google storage bucket  to be used
  * @param {*} fileName The name of file in that bucket to be used 
  * @param {*} content  The content to add in thatr file
+ * @param {*} context context of the executed Google Cloud Function
  */
-const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "") => {
+const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context="") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
@@ -199,6 +200,6 @@ exports.helloPubSub = async (event, context) => {
         : 'Hello, World';
     console.log("message is---", message);
     const isBucket = await checkBucketExistence(bucketName);
-    bucketCrud(isBucket, bucketName, fileName, content);
+    bucketCrud(isBucket, bucketName, fileName, content, context);
     csvQuery();
 };
