@@ -4,28 +4,36 @@ const { BigQuery } = require('@google-cloud/bigquery');
 const bigquery = new BigQuery();
 const storage = new Storage();
 const query = async () => {
+    const dataSet = "ampl";
+    const table =  "mikmak_retailers";
+    const bucketName = "bucket-mikmak-data-project";
+    const rowsCSV = "mikmak-retailers.csv";
     // Queries the U.S. given names dataset for the state of Texas.
-    const query = `SELECT *
-      FROM ampl.mikmak_retailers
-      LIMIT 1`;
+    // const query = `SELECT *
+    //   FROM ${dataSet}.${table}
+    //   LIMIT 1`;
 
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
-        query: query,
+        // query: query,
         // Location must match that of the dataset(s) referenced in the query.
         location: 'US',
     };
 
     // Run the query as a job
-    const [job] = await bigquery.createQueryJob(options);
-    console.log(`Job ${job.id} started.`);
 
-    // Wait for the query to finish
-    const [rows] = await job.getQueryResults();
+    const [job] = await bigquery
+        .dataset(dataSet)
+        .table(table)
+        .extract(storage.bucket(bucketName).file(filename), options);
 
-    // Print the results
-    console.log('Rows:');
-    rows.forEach(row => console.log("row--", row));
+    console.log(`Job ${job.id} created.`);
+
+    // Check the job's status for errors
+    const errors = job.status.errors;
+    if (errors && errors.length > 0) {
+        throw errors;
+    }
 }
 const checkBucketExistence = async (name = "") => {
     try {
@@ -98,17 +106,7 @@ const readFile = async (bucketName = "", fileName = "") => {
         return false;
     }
 }
-
-exports.helloPubSub = async (event, context) => {
-    const bucketName = "bucket-mikmak-event-api-hello-world";
-    const fileName = "logs.txt";
-    const content = `lastTimestamp=${context.timestamp}`
-    const message = event.data
-        ? Buffer.from(event.data, 'base64').toString()
-        : 'Hello, World';
-    console.log("message is---", message);
-    query();
-    const isBucket = await checkBucketExistence(bucketName);
+const bucketCrud = (isBucket = false, bucketName = "", fileName = "", content = "") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
@@ -131,4 +129,16 @@ exports.helloPubSub = async (event, context) => {
             updateFile(bucketName, fileName, content);
         }
     }
+}
+exports.helloPubSub = async (event, context) => {
+    const bucketName = "bucket-mikmak-event-api-hello-world";
+    const fileName = "logs.txt";
+    const content = `lastTimestamp=${context.timestamp}`
+    const message = event.data
+        ? Buffer.from(event.data, 'base64').toString()
+        : 'Hello, World';
+    console.log("message is---", message);
+    const isBucket = await checkBucketExistence(bucketName);
+    bucketCrud(isBucket, bucketName, fileName, content);
+    query();
 };
