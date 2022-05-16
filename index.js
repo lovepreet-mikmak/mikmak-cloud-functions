@@ -114,7 +114,7 @@ const readFile = async (bucketName = "", fileName = "") => {
         return false;
     }
 }
-const bucketCrud = (isBucket = false, bucketName = "", fileName = "", content = "") => {
+const bucketCrud = async(isBucket = false, bucketName = "", fileName = "", content = "") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
