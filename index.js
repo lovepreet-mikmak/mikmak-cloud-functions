@@ -3,7 +3,7 @@ const { Storage } = require('@google-cloud/storage');
 const { BigQuery } = require('@google-cloud/bigquery');
 const bigquery = new BigQuery();
 const storage = new Storage();
-const extractCSVJob = (bucketName = "", fileName = "", dataSet = "", table = "") => {
+const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     // Run the query as a job
     const [job] = await bigquery
