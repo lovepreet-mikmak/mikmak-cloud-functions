@@ -5,7 +5,6 @@ const bigquery = new BigQuery();
 const storage = new Storage();
 const query = async () => {
     // Queries the U.S. given names dataset for the state of Texas.
-    select * from 
     const query = `SELECT *
       FROM ampl.mikmak_retailers
       LIMIT 100`;
