@@ -3,17 +3,17 @@ const { Storage } = require('@google-cloud/storage');
 const { BigQuery } = require('@google-cloud/bigquery');
 const bigquery = new BigQuery();
 const storage = new Storage();
+/**
+ * This function will do the job of extracting data from database and store in a .csv file on google cloud storage
+ * @param {*} bucketName The name of google storage bucket to be used
+ * @param {*} fileName The name of file of that bucket to be used
+ * @param {*} dataSet  The name of the databse in the project
+ * @param {*} table  The name of the table inside that database
+ */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
-    // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
-    // Run the query as a job
     const options = {
         sourceFormat: 'CSV',
         skipLeadingRows: 1,
-        schema: {
-            fields: [
-                "active",	"id"
-            ],
-        },
         location: 'US',
     }
     const [job] = await bigquery
@@ -29,30 +29,31 @@ const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table
         throw errors;
     }
 }
-const query = async () => {
+/**
+ * This is the main function for CSV Task that calls extractCSVJob() based upon conditional check on if bucket avaialble or not. if the bucket  doesn't exists then it will first create a new bucket and then perform extraction job
+ */
+const csvQuery = async () => {
     const dataSet = "ampl";
     const table = "mikmak_retailers";
     const bucketName = "bucket-mikmak-data-project";
-    const rowsCSV = "mikmak-retailers.csv";
-    // Queries the U.S. given names dataset for the state of Texas.
-    // const query = `SELECT *
-    //   FROM ${dataSet}.${table}
-    //   LIMIT 1`;
-
-
-
+    const fileName = "mikmak-retailers.csv";
     const isBucket = await checkBucketExistence(bucketName);
-    console.log("is bucket exist---", isBucket);
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
-            extractCSVJob(bucketName, rowsCSV, dataSet, table)
+            extractCSVJob(bucketName, fileName, dataSet, table)
         }
     } else {
-        extractCSVJob(bucketName, rowsCSV, dataSet, table)
+        extractCSVJob(bucketName, fileName, dataSet, table)
     }
 
 }
+/**
+ * 
+ * @param {*} name The name of the bucket which needs to be checked for availablity
+ * @returns  Boolean value based upon existence of the bucket on google cloud storage
+    This is the helper function which is checking weather the bucket with given name is available or not on google cloud storage
+ */
 const checkBucketExistence = async (name = "") => {
     try {
         const [buckets] = await storage.getBuckets();
@@ -63,8 +64,12 @@ const checkBucketExistence = async (name = "") => {
         return false;
     }
 };
+/**
+ * This is the helper method to create a bucket on Google cloud storage
+ * @param {*} name The name of the bucket which needs to be created if not available
+ * @returns Boolean value based upon creation job of the bucket on google cloud storage
+ */
 const createBucket = async (name = "") => {
-    // Creates the new bucket
     try {
         await storage.createBucket(name);
         console.log(`Bucket ${name} created.`);
@@ -75,12 +80,24 @@ const createBucket = async (name = "") => {
         return false;
     }
 };
+/**
+ * This is the Helper function to check existence of the File in a bucket on Google Cloud Storage
+ * @param {*} bucketName The name of google storage bucket to be used
+ * @param {*} fileName The name of file of that bucket to be checked for existence
+ * @returns Boolean value based upon existence of the file in that particular bucket
+ */
 const checkFileExistence = async (bucketName = "", fileName = "") => {
     const [files] = await storage.bucket(bucketName).getFiles();
-
-    // console.log("Files:", files);
     return files.findIndex(file => file.name === fileName) >= 0 ? true : false;;
 }
+
+/**
+ * This is the Helper Function to Create a File in Bucket
+ * @param {*} bucketName The name of google storage bucketin which file is needed to be created
+ * @param {*} fileName The name of file of that bucket to be created
+ * @param {*} content The content of the file to be written
+ * @returns Boolean value based upon creation of the file in that particular bucket
+ */
 const createFile = async (bucketName = "", fileName = "", content = "") => {
     try {
         await storage.bucket(bucketName).file(fileName).save(content);
@@ -95,6 +112,13 @@ const createFile = async (bucketName = "", fileName = "", content = "") => {
         return false;
     }
 };
+/**
+ * This is the Helper Function to update content in the file
+ * @param {*} bucketName The name of google storage bucket in which file is needed to be updated
+ * @param {*} fileName The name of file of that bucket to be updated
+ * @param {*} content The content of the file to be written
+ * @returns Boolean value based upon updation of the file in that particular bucket
+ */
 const updateFile = async (bucketName = "", fileName = "", content = "") => {
     try {
         await storage.bucket(bucketName).file(fileName).delete();
@@ -106,6 +130,12 @@ const updateFile = async (bucketName = "", fileName = "", content = "") => {
         return false;
     }
 };
+/**
+ * This is the Helper Function to read file on Google Cloud Storage
+ * @param {*} bucketName The name of google storage bucket in which file is needed to be Read
+ * @param {*} fileName The name of file of that bucket to be updated
+ * @returns  null if file is empty, sliced string if file contains data and false if error
+ */
 const readFile = async (bucketName = "", fileName = "") => {
     try {
         // Downloads the file into a buffer in memory.
@@ -124,6 +154,13 @@ const readFile = async (bucketName = "", fileName = "") => {
         return false;
     }
 }
+/**
+ * This is the Helper Function which will perform task of calculating difference in last deploy and current deploy time of Google Cloud Function
+ * @param {*} isBucket  boolean value of if bucket exist on Google Cloud Storage
+ * @param {*} bucketName The name of google storage bucket  to be used
+ * @param {*} fileName The name of file in that bucket to be used 
+ * @param {*} content  The content to add in thatr file
+ */
 const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
@@ -148,15 +185,20 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
         }
     }
 }
+/**
+ * This is the main entery point of the application from where Google Cloud Function Starts its execution
+ * @param {*} event  event of the executed Google Cloud Function
+ * @param {*} context context of the executed Google Cloud Function
+ */
 exports.helloPubSub = async (event, context) => {
-    // const bucketName = "bucket-mikmak-data-project-hello-world";
-    // const fileName = "logs.txt";
-    // const content = `lastTimestamp=${context.timestamp}`
+    const bucketName = "bucket-mikmak-data-project-hello-world";
+    const fileName = "logs.txt";
+    const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
-    // const isBucket = await checkBucketExistence(bucketName);
-    // bucketCrud(isBucket, bucketName, fileName, content);
-    query();
+    const isBucket = await checkBucketExistence(bucketName);
+    bucketCrud(isBucket, bucketName, fileName, content);
+    csvQuery();
 };
