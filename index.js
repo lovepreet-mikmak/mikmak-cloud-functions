@@ -3,29 +3,18 @@ const { Storage } = require('@google-cloud/storage');
 const { BigQuery } = require('@google-cloud/bigquery');
 const bigquery = new BigQuery();
 const storage = new Storage();
-const query = async () => {
-    const dataSet = "ampl";
-    const table =  "mikmak_retailers";
-    const bucketName = "bucket-mikmak-data-project";
-    const rowsCSV = "mikmak-retailers.csv";
-    // Queries the U.S. given names dataset for the state of Texas.
-    // const query = `SELECT *
-    //   FROM ${dataSet}.${table}
-    //   LIMIT 1`;
-
+const extractCSVJob = (bucketName = "", fileName = "", dataSet = "", table = "") => {
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
         // query: query,
         // Location must match that of the dataset(s) referenced in the query.
         location: 'US',
     };
-
     // Run the query as a job
-
     const [job] = await bigquery
         .dataset(dataSet)
         .table(table)
-        .extract(storage.bucket(bucketName).file(rowsCSV), options);
+        .extract(storage.bucket(bucketName).file(fileName), options);
 
     console.log(`Job ${job.id} created.`);
 
@@ -34,6 +23,29 @@ const query = async () => {
     if (errors && errors.length > 0) {
         throw errors;
     }
+}
+const query = async () => {
+    const dataSet = "ampl";
+    const table = "mikmak_retailers";
+    const bucketName = "bucket-mikmak-data-project";
+    const rowsCSV = "mikmak-retailers.csv";
+    // Queries the U.S. given names dataset for the state of Texas.
+    // const query = `SELECT *
+    //   FROM ${dataSet}.${table}
+    //   LIMIT 1`;
+
+
+
+    const isBucket = await checkBucketExistence(bucketName);
+    if (!isBucket) {
+        const bucketAdded = await createBucket(bucketName);
+        if (bucketAdded) {
+            extractCSVJob(bucketName, rowsCSV, dataSet, table)
+        }
+    } else{
+        extractCSVJob(bucketName, rowsCSV, dataSet, table)
+    }
+
 }
 const checkBucketExistence = async (name = "") => {
     try {
@@ -53,7 +65,7 @@ const createBucket = async (name = "") => {
         return true;
     }
     catch (error) {
-        console.log("error occured during creating bucket:-", error);
+        console.log(`error occured during creating bucket name = ${name} and error is:-`, error);
         return false;
     }
 };
