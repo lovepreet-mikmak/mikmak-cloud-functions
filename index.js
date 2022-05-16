@@ -5,16 +5,11 @@ const bigquery = new BigQuery();
 const storage = new Storage();
 const extractCSVJob = (bucketName = "", fileName = "", dataSet = "", table = "") => {
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
-    const options = {
-        // query: query,
-        // Location must match that of the dataset(s) referenced in the query.
-        location: 'US',
-    };
     // Run the query as a job
     const [job] = await bigquery
         .dataset(dataSet)
         .table(table)
-        .extract(storage.bucket(bucketName).file(fileName), options);
+        .extract(storage.bucket(bucketName).file(fileName));
 
     console.log(`Job ${job.id} created.`);
 
@@ -37,6 +32,7 @@ const query = async () => {
 
 
     const isBucket = await checkBucketExistence(bucketName);
+    console.log("is bucket exist---", isBucket);
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
