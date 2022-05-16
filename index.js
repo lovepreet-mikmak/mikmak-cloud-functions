@@ -25,7 +25,7 @@ const query = async () => {
     const [job] = await bigquery
         .dataset(dataSet)
         .table(table)
-        .extract(storage.bucket(bucketName).file(filename), options);
+        .extract(storage.bucket(bucketName).file(rowsCSV), options);
 
     console.log(`Job ${job.id} created.`);
 
