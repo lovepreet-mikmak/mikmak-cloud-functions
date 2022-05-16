@@ -6,10 +6,20 @@ const storage = new Storage();
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     // Run the query as a job
+    const options = {
+        sourceFormat: 'CSV',
+        skipLeadingRows: 1,
+        schema: {
+            fields: [
+                "active",	"id"
+            ],
+        },
+        location: 'US',
+    }
     const [job] = await bigquery
         .dataset(dataSet)
         .table(table)
-        .extract(storage.bucket(bucketName).file(fileName));
+        .extract(storage.bucket(bucketName).file(fileName), options);
 
     console.log(`Job ${job.id} created.`);
 
@@ -38,7 +48,7 @@ const query = async () => {
         if (bucketAdded) {
             extractCSVJob(bucketName, rowsCSV, dataSet, table)
         }
-    } else{
+    } else {
         extractCSVJob(bucketName, rowsCSV, dataSet, table)
     }
 
@@ -114,7 +124,7 @@ const readFile = async (bucketName = "", fileName = "") => {
         return false;
     }
 }
-const bucketCrud = async(isBucket = false, bucketName = "", fileName = "", content = "") => {
+const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
