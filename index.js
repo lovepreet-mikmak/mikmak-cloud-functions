@@ -131,7 +131,7 @@ const bucketCrud = (isBucket = false, bucketName = "", fileName = "", content = 
     }
 }
 exports.helloPubSub = async (event, context) => {
-    const bucketName = "bucket-mikmak-event-api-hello-world";
+    const bucketName = "bucket-mikmak-data-project-hello-world";
     const fileName = "logs.txt";
     const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
