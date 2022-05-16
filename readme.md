@@ -13,7 +13,7 @@ This Repository's Deployment on GCP is made CI/CD compatible with the help of gi
 
 - Create a Project in GCP.
 - Inside that Project, Create a Service account and enable billing for it.
-- The Service account must have these following Roles:- Cloud Functions Admin, Service Account User, Storage Admin and Storage Object Viewer. Make sure Your service account must have these roles and permissions by navigating to IAM settings in GCP.
+- The Service account must have these following Roles:- `Cloud Functions Developer`, `Cloud Functions Admin`, `Service Account User`, `Storage Admin` and `Storage Object Viewer`. Make sure Your service account must have these roles and permissions by navigating to IAM settings in GCP.
 - Create a Service Account Key and copy to clipboard for later use.
 - Copy Project Id to clipboard for later use.
 - In GCP Top Navbar, type `Topics` in search bar and Create  a Pub/sub Topic on that page by following given instructions on that page.

@@ -7,7 +7,7 @@ const query = async () => {
     // Queries the U.S. given names dataset for the state of Texas.
     select * from 
     const query = `SELECT *
-      FROM \`ampl.mikmak_retailers\`
+      FROM ampl.mikmak_retailers
       LIMIT 100`;
 
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
