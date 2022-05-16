@@ -143,14 +143,14 @@ const bucketCrud = (isBucket = false, bucketName = "", fileName = "", content = 
     }
 }
 exports.helloPubSub = async (event, context) => {
-    const bucketName = "bucket-mikmak-data-project-hello-world";
-    const fileName = "logs.txt";
-    const content = `lastTimestamp=${context.timestamp}`
+    // const bucketName = "bucket-mikmak-data-project-hello-world";
+    // const fileName = "logs.txt";
+    // const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
         ? Buffer.from(event.data, 'base64').toString()
         : 'Hello, World';
     console.log("message is---", message);
-    const isBucket = await checkBucketExistence(bucketName);
-    bucketCrud(isBucket, bucketName, fileName, content);
+    // const isBucket = await checkBucketExistence(bucketName);
+    // bucketCrud(isBucket, bucketName, fileName, content);
     query();
 };
