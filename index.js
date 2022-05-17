@@ -11,27 +11,16 @@ const storage = new Storage();
  * @param {*} table  The name of the table inside that database
  */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
-    // const options = {
-    //     sourceFormat: 'CSV',
-    //     skipLeadingRows: 1,
-    //     location: 'US',
-    //     header: true,
-    //     view: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`
-    // }
-    const query =
-    `SELECT * FROM  ${dataSet}.${table} LIMIT 5`;
-
-    // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
-      query: query,
-      // Location must match that of the dataset(s) referenced in the query.
-      location: 'US',
-      useLegacySql: true,
-    };
+        sourceFormat: 'CSV',
+        skipLeadingRows: 1,
+        location: 'US',
+    }
 
-    // Run the query as a job
-    const [job] = await bigquery.createQueryJob(options)
-        .extract(storage.bucket(bucketName).file(fileName));
+    const [job] = await bigquery
+        .dataset(dataSet)
+        .table(table).query(`SELECT * FROM  ${dataSet}.${table} LIMIT 5`)
+        .extract(storage.bucket(bucketName).file(fileName), options);
 
     console.log(`Job ${job.id} created.`);
 
@@ -174,7 +163,7 @@ const readFile = async (bucketName = "", fileName = "") => {
  * @param {*} content  The content to add in thatr file
  * @param {*} context context of the executed Google Cloud Function
  */
-const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context="") => {
+const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context = "") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
