@@ -11,46 +11,26 @@ const storage = new Storage();
  * @param {*} table  The name of the table inside that database
  */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
-    // const options = {
-    //     sourceFormat: 'CSV',
-    //     skipLeadingRows: 1,
-    //     location: 'US',
-    // }
+    const query = `SELECT * From ${dataSet}.${table}
+      LIMIT 1`;
 
-    // const [job] = await bigquery
-    //     .dataset(dataSet)
-    //     .table(table).query(`SELECT * FROM  ${dataSet}.${table} LIMIT 5`)
-    //     .extract(storage.bucket(bucketName).file(fileName), options);
-
-    // console.log(`Job ${job.id} created.`);
-    const queryJobConfig = {
-        query: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`,
-        useLegacySql: false,
-        priority: 'BATCH',
+    // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
+    const options = {
+      query: query,
+      // Location must match that of the dataset(s) referenced in the query.
+      location: 'US',
     };
 
-    // Create job configuration. For all options, see
-    // https://cloud.google.com/bigquery/docs/reference/rest/v2/Job#jobconfiguration
-    const jobConfig = {
-        // Specify a job configuration to set optional job resource properties.
-        configuration: {
-            query: queryJobConfig,
-        },
-    };
+    // Run the query as a job
+    const [job] = await bigquery.createQueryJob(options);
+    console.log(`Job ${job.id} started.`);
 
-    // Make API request.
-    const [job] = await bigquery.createJob(jobConfig);
-
-    const jobId = job.metadata.id;
-    const state = job.metadata.status.state;
-    console.log(`Job ${jobId} is currently in state ${state}`);
+    // Wait for the query to finish
     const [rows] = await job.getQueryResults();
-    storage.bucket(bucketName).file(fileName).save(rows, () => {
-        console.log(
-            `${fileName} saved.`
-        );
-    });
 
+    // Print the results
+    console.log('Rows:');
+    rows.forEach(row => console.log("row is ---",row));
     // Check the job's status for errors
     const errors = job.status.errors;
     if (errors && errors.length > 0) {
@@ -190,7 +170,7 @@ const readFile = async (bucketName = "", fileName = "") => {
  * @param {*} content  The content to add in thatr file
  * @param {*} context context of the executed Google Cloud Function
  */
-const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context = "") => {
+const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context="") => {
     if (!isBucket) {
         const bucketAdded = await createBucket(bucketName);
         if (bucketAdded) {
