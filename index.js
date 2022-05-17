@@ -15,7 +15,8 @@ const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table
         sourceFormat: 'CSV',
         skipLeadingRows: 1,
         location: 'US',
-        query: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`
+        header: true,
+        view: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`
     }
     const [job] = await bigquery
         .dataset(dataSet)
