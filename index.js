@@ -11,18 +11,45 @@ const storage = new Storage();
  * @param {*} table  The name of the table inside that database
  */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
-    const options = {
-        sourceFormat: 'CSV',
-        skipLeadingRows: 1,
-        location: 'US',
-    }
+    // const options = {
+    //     sourceFormat: 'CSV',
+    //     skipLeadingRows: 1,
+    //     location: 'US',
+    // }
 
-    const [job] = await bigquery
-        .dataset(dataSet)
-        .table(table).query(`SELECT * FROM  ${dataSet}.${table} LIMIT 5`)
-        .extract(storage.bucket(bucketName).file(fileName), options);
+    // const [job] = await bigquery
+    //     .dataset(dataSet)
+    //     .table(table).query(`SELECT * FROM  ${dataSet}.${table} LIMIT 5`)
+    //     .extract(storage.bucket(bucketName).file(fileName), options);
 
-    console.log(`Job ${job.id} created.`);
+    // console.log(`Job ${job.id} created.`);
+    const queryJobConfig = {
+        query: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`,
+        useLegacySql: false,
+        priority: 'BATCH',
+    };
+
+    // Create job configuration. For all options, see
+    // https://cloud.google.com/bigquery/docs/reference/rest/v2/Job#jobconfiguration
+    const jobConfig = {
+        // Specify a job configuration to set optional job resource properties.
+        configuration: {
+            query: queryJobConfig,
+        },
+    };
+
+    // Make API request.
+    const [job] = await bigquery.createJob(jobConfig);
+
+    const jobId = job.metadata.id;
+    const state = job.metadata.status.state;
+    console.log(`Job ${jobId} is currently in state ${state}`);
+    const [rows] = await job.getQueryResults();
+    storage.bucket(bucketName).file(fileName).save(rows, () => {
+        console.log(
+            `${fileName} saved.`
+        );
+    });
 
     // Check the job's status for errors
     const errors = job.status.errors;
