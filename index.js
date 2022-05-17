@@ -11,17 +11,27 @@ const storage = new Storage();
  * @param {*} table  The name of the table inside that database
  */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
+    // const options = {
+    //     sourceFormat: 'CSV',
+    //     skipLeadingRows: 1,
+    //     location: 'US',
+    //     header: true,
+    //     view: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`
+    // }
+    const query =
+    `SELECT * FROM  ${dataSet}.${table} LIMIT 5`;
+
+    // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
-        sourceFormat: 'CSV',
-        skipLeadingRows: 1,
-        location: 'US',
-        header: true,
-        view: `SELECT * FROM  ${dataSet}.${table} LIMIT 5`
-    }
-    const [job] = await bigquery
-        .dataset(dataSet)
-        .table(table)
-        .extract(storage.bucket(bucketName).file(fileName), options);
+      query: query,
+      // Location must match that of the dataset(s) referenced in the query.
+      location: 'US',
+      useLegacySql: true,
+    };
+
+    // Run the query as a job
+    const [job] = await bigquery.createQueryJob(options)
+        .extract(storage.bucket(bucketName).file(fileName));
 
     console.log(`Job ${job.id} created.`);
 
