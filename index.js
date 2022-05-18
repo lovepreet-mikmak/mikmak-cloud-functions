@@ -11,8 +11,8 @@ const storage = new Storage();
  * @param {*} table  The name of the table inside that database
  */
 const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
-    const query = `SELECT * From ${dataSet}.${table}
-      LIMIT 1`;
+    const query = `SELECT COUNT(*) From ${dataSet}.${table}
+      `;
 
     // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
     const options = {
@@ -26,11 +26,11 @@ const extractCSVJob = async (bucketName = "", fileName = "", dataSet = "", table
     console.log(`Job ${job.id} started.`);
 
     // Wait for the query to finish
-    const [rows] = await job.getQueryResults();
+    const [result] = await job.getQueryResults();
 
     // Print the results
-    console.log('Rows:');
-    rows.forEach(row => console.log("row is ---",row));
+    console.log('result:', result);
+    // rows.forEach(row => console.log("row is ---",row));
     // Check the job's status for errors
     const errors = job.status.errors;
     if (errors && errors.length > 0) {
@@ -194,20 +194,21 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
         }
     }
 }
+csvQuery();
 /**
  * This is the main entery point of the application from where Google Cloud Function Starts its execution
  * @param {*} event  event of the executed Google Cloud Function
  * @param {*} context context of the executed Google Cloud Function
  */
-exports.helloPubSub = async (event, context) => {
-    const bucketName = "bucket-mikmak-data-project-hello-world";
-    const fileName = "logs.txt";
-    const content = `lastTimestamp=${context.timestamp}`
-    const message = event.data
-        ? Buffer.from(event.data, 'base64').toString()
-        : 'Hello, World';
-    console.log("message is---", message);
-    const isBucket = await checkBucketExistence(bucketName);
-    bucketCrud(isBucket, bucketName, fileName, content, context);
-    csvQuery();
-};
+// exports.helloPubSub = async (event, context) => {
+//     const bucketName = "bucket-mikmak-data-project-hello-world";
+//     const fileName = "logs.txt";
+//     const content = `lastTimestamp=${context.timestamp}`
+//     const message = event.data
+//         ? Buffer.from(event.data, 'base64').toString()
+//         : 'Hello, World';
+//     console.log("message is---", message);
+//     const isBucket = await checkBucketExistence(bucketName);
+//     bucketCrud(isBucket, bucketName, fileName, content, context);
+  
+// };
