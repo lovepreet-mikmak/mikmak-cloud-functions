@@ -266,7 +266,7 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
  * @param {*} event  event of the executed Google Cloud Function
  * @param {*} context context of the executed Google Cloud Function
  */
-(helloPubSub = async (event, context) => {
+helloPubSub = async (event, context) => {
   try {
     const bucketName = "bucket-mikmak-data-project-hello-world";
     const fileName = "logs.txt";
@@ -281,4 +281,4 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
   } catch (err) {
     console.log("Error in helloPubSub--", err);
   }
-})();
+};
