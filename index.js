@@ -120,7 +120,7 @@ const exportDBRecords = async () => {
     const table = "mikmak_retailers";
     const bucketName = "bucket-mikmak-data-project";
     const fileName = "mikmak-retailers.csv";
-    const isBucket = checkBucketExistence(bucketName);
+    const isBucket = await checkBucketExistence(bucketName);
     if (!isBucket) {
       const bucketAdded = await createBucket(bucketName);
       if (bucketAdded) {
@@ -260,7 +260,7 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
         const diff = moment(oldContent).from(moment(context.timestamp))
         console.log("Time Interval since last Trigger---", diff);
       } else {
-        console.log(`This is the first time,when ${fileName} file is created`);
+        console.log(`This is the first time, Since ${fileName} file is created`);
       }
       await updateFile(bucketName, fileName, content);
     }
@@ -271,9 +271,9 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
  * @param {*} event  event of the executed Google Cloud Function
  * @param {*} context context of the executed Google Cloud Function
  */
-helloPubSub = async (event, context) => {
+main = async (event, context) => {
   try {
-    const bucketName = "bucket-mikmak-data-project-hello-world";
+    const bucketName = "bucket-mikmak-data-project";
     const fileName = "logs.txt";
     const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
@@ -284,6 +284,6 @@ helloPubSub = async (event, context) => {
     await bucketCrud(isBucket, bucketName, fileName, content, context);
     // exportDBRecords();
   } catch (err) {
-    console.log("Error in helloPubSub--", err);
+    console.log("Error in main--", err);
   }
 };

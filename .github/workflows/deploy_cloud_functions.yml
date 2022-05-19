@@ -20,9 +20,9 @@ jobs:
         uses: 'google-github-actions/deploy-cloud-functions@v0.4.0'
         with:
         #(Required) Name of the Cloud Function.
-          name: pub_sub_hello_world_example
+          name: export_csv_to_GCS
           runtime: 'nodejs16'
-          entry_point: helloPubSub
+          entry_point: main
           event_trigger_type: providers/cloud.pubsub/eventTypes/topic.publish
           event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/${{ secrets.GCP_PROJECT_TOPIC_ID }}
           # event_trigger_service: pubsub.googleapis.com
