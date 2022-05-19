@@ -47,6 +47,11 @@ const getColumnNames = async (db = "", table = "") => {
     console.log("Error in getting column names---", err);
   }
 }
+/**
+ * 
+ * @param {*} bucketName Name of the bucket to use
+ * @param {*} fileName  Name of the file in the bucket
+ */
 const uploadCSVToGCS = async (bucketName = "", fileName = "") => {
   try {
     await storage.bucket(bucketName).upload("out.csv", {
@@ -277,7 +282,7 @@ helloPubSub = async (event, context) => {
     console.log("message is---", message);
     const isBucket = await checkBucketExistence(bucketName);
     await bucketCrud(isBucket, bucketName, fileName, content, context);
-    exportDBRecords();
+    // exportDBRecords();
   } catch (err) {
     console.log("Error in helloPubSub--", err);
   }
