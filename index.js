@@ -271,7 +271,7 @@ const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", cont
  * @param {*} event  event of the executed Google Cloud Function
  * @param {*} context context of the executed Google Cloud Function
  */
-main = async (event, context) => {
+exports.main = async (event, context) => {
   try {
     const bucketName = "bucket-mikmak-data-project";
     const fileName = "logs.txt";
