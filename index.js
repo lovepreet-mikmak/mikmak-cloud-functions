@@ -1,5 +1,5 @@
-const moment = require('moment');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const ObjectsToCsv = require('objects-to-csv');
+const moment = require('moment')
 const {
   Storage
 } = require('@google-cloud/storage');
@@ -24,44 +24,7 @@ const getDBRecords = (options = {}) => {
     })
   })
 }
-/**
- * 
- * @param {*} db Databe Name | string
- * @param {*} table  Table Name | tstring
- */
-const getColumnNames = async (db = "", table = "") => {
-  try {
-    const query = `SELECT column_name
-    FROM ${db}.INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = '${table}';`;
-    const options = {
-      query: query,
-      // Location must match that of the db(s) referenced in the query.
-      location: 'US',
-    };
-    const [job] = await bigquery.createQueryJob(options);
-    let [result] = await job.getQueryResults();
-    result = result.map((key, index, arr) => arr[index].column_name);
-    return result;
-  } catch (err) {
-    console.log("Error in getting column names---", err);
-  }
-}
-/**
- * 
- * @param {*} bucketName Name of the bucket to use
- * @param {*} fileName  Name of the file in the bucket
- */
-const uploadCSVToGCS = async (bucketName = "", fileName = "") => {
-  try {
-    await storage.bucket(bucketName).upload("out.csv", {
-      destination: fileName
-    });
-    console.log(`Contents of gs://${bucketName}/${fileName} are updated successfully.`);
-  } catch (err) {
-    console.log("error while uplaoding out.csv to GCS:-", err);
-  }
-}
+
 /**
  * This function will do the job of extracting data from database and store in a .csv file on google cloud storage
  * @param {*} bucketName The name of google storage bucket to be used
@@ -71,12 +34,6 @@ const uploadCSVToGCS = async (bucketName = "", fileName = "") => {
  */
 const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
   try {
-    const columns = await getColumnNames(dataSet, table);
-    console.log("columns Names---", columns.join(","));
-    const csvWriter = createCsvWriter({
-      path: 'out.csv',
-      header: columns.map(item => ({ id: item, title: item }))
-    });
     const batchSize = 100;
     const rowCountQuery = `SELECT COUNT(*) From ${dataSet}.${table}`;
     const rowCountQueryOptions = {
@@ -88,22 +45,28 @@ const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "",
     const [result] = await job.getQueryResults();
     const rowsCount = result && result.length ? result[0].f0_ : 0;
     console.log('Total Records count:', result);
-    const batchs = Math.ceil(rowsCount / batchSize);
+    const batches = Math.ceil(rowsCount / batchSize);
 
-    for (let i = 0; i < batchs; i++) {
-      const query = `SELECT *From ${dataSet}.${table} ORDER BY id LIMIT ${batchSize} OFFSET ${batchSize * i}`;
+    for (let i = 0; i < batches; i++) {
+      const query = `SELECT * From ${dataSet}.${table} ORDER BY id LIMIT ${batchSize} OFFSET ${batchSize * i}`;
       const options = {
         query: query,
         location: 'US',
       }
       const resultArr = await getDBRecords(options);
       console.log(`batch ${i + 1} total records--`, resultArr.length);
-      await csvWriter.writeRecords(resultArr);
-      console.log(`The CSV file's batch ${i + 1} was written in out.csv local file successfully`);
-      if (i === batchs - 1) {
-        await uploadCSVToGCS(bucketName, fileName);
+      const arr = resultArr.map((item) => {
+        Object.keys(item).map(key => typeof item[key] === "boolean" ? (item[key] ? item[key] = "true" : item[key] = "false") : null);
+        return item;
+      })
+      const csv = new ObjectsToCsv(arr);
+      const makeHeaders = i === 0 ? true : false;
+      const csvString = await csv.toString(makeHeaders);
+      await uploaadCSVFromMemory(bucketName, fileName, csvString);
+      console.log(`The CSV file's batch ${i + 1} was written successfully`);
+      if (i === batches - 1) {
+        console.log(`Total CSV Writting Process of file:-${fileName} completed successfully`);
       }
-      console.log("loop end ", i + 1);
     }
   } catch (err) {
     return console.log("Error in catch---", err);
@@ -119,7 +82,7 @@ const exportDBRecords = async () => {
     const dataSet = "ampl";
     const table = "mikmak_retailers";
     const bucketName = "bucket-mikmak-data-project";
-    const fileName = "mikmak-retailers.csv";
+    const fileName = `mikmak-retailers_${moment().toISOString()}.csv`;
     const isBucket = await checkBucketExistence(bucketName);
     if (!isBucket) {
       const bucketAdded = await createBucket(bucketName);
@@ -182,7 +145,6 @@ const checkFileExistence = async (bucketName = "", fileName = "") => {
  * @param {*} bucketName The name of google storage bucketin which file is needed to be created
  * @param {*} fileName The name of file of that bucket to be created
  * @param {*} content The content of the file to be written
- * @returns Boolean value based upon creation of the file in that particular bucket
  */
 const createFile = async (bucketName = "", fileName = "", content = "") => {
   try {
@@ -191,12 +153,26 @@ const createFile = async (bucketName = "", fileName = "", content = "") => {
     console.log(
       `${fileName} with content ${content} uploaded to ${bucketName}.`
     );
-    return true;
 
   } catch (error) {
     console.log("error while creating file:-", error);
   }
 };
+const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = "") => {
+  try {
+    const isFile = await checkFileExistence(bucketName, fileName);
+    if (!isFile) {
+      await storage.bucket(bucketName).file(fileName).save(content);
+    } else {
+      await storage.bucket(bucketName).file('tempFile').save(content);
+      await storage.bucket(bucketName).combine([fileName, 'tempFile'], fileName);
+      await storage.bucket(bucketName).file('tempFile').delete();
+    }
+  }
+  catch (error) {
+    console.log("error while uploading csv from memory :-", error);
+  }
+}
 /**
  * This is the Helper Function to update content in the file
  * @param {*} bucketName The name of google storage bucket in which file is needed to be updated
