@@ -282,7 +282,7 @@ exports.main = async (event, context) => {
     console.log("message is---", message);
     const isBucket = await checkBucketExistence(bucketName);
     await bucketCrud(isBucket, bucketName, fileName, content, context);
-    // exportDBRecords();
+    exportDBRecords();
   } catch (err) {
     console.log("Error in main--", err);
   }
