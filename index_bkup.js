@@ -8,18 +8,6 @@ const {
 } = require('@google-cloud/bigquery');
 const bigquery = new BigQuery();
 const storage = new Storage();
-const brands = [
-  {
-    brand_id: "8d062aa4-cbb2-005e-9a68-7a7e7cb689ef",
-    export_cloud_storage: "liveramp_export_test_bucket_1"
-  },
-  {
-    brand_id: "4f76bae7-8ff6-1fc6-f874-2272854dfc45",
-    export_cloud_storage: "liveramp_export_bucket_2"
-  }
-]
-const DB = "ampl_dev";
-const TABLE = "liveramp_export_test_table";
 /**
  * 
  * @param {*} options 
@@ -43,9 +31,8 @@ const getDBRecords = (options = {}) => {
  * @param {*} fileName The name of file of that bucket to be used
  * @param {*} dataSet  The name of the databse in the project
  * @param {*} table  The name of the table inside that database
- * @param {*} brand_id Brand id to be used in where clause of query
  */
-const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "", table = "", brand_id = "") => {
+const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "", table = "") => {
   try {
     const batchSize = 100;
     const rowCountQuery = `SELECT COUNT(*) From ${dataSet}.${table}`;
@@ -57,16 +44,17 @@ const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "",
     const [job] = await bigquery.createQueryJob(rowCountQueryOptions);
     const [result] = await job.getQueryResults();
     const rowsCount = result && result.length ? result[0].f0_ : 0;
-    console.log(`Total Records count for brand id = ${brand_id}: ${result}`);
+    console.log('Total Records count:', result);
     const batches = Math.ceil(rowsCount / batchSize);
+
     for (let i = 0; i < batches; i++) {
-      const query = `SELECT * From ${dataSet}.${table} ORDER BY id WHERE brand_id= ${brand_id} LIMIT ${batchSize} OFFSET ${batchSize * i}`;
+      const query = `SELECT * From ${dataSet}.${table} ORDER BY id LIMIT ${batchSize} OFFSET ${batchSize * i}`;
       const options = {
         query: query,
         location: 'US',
       }
       const resultArr = await getDBRecords(options);
-      console.log(`batch ${i + 1} Total records for brand id: ${brand_id}--`, resultArr.length);
+      console.log(`batch ${i + 1} total records--`, resultArr.length);
       const arr = resultArr.map((item) => {
         Object.keys(item).map(key => typeof item[key] === "boolean" ? (item[key] ? item[key] = "true" : item[key] = "false") : null);
         return item;
@@ -77,29 +65,32 @@ const batchProcessRecords = async (bucketName = "", fileName = "", dataSet = "",
       await uploaadCSVFromMemory(bucketName, fileName, csvString);
       console.log(`The CSV file's batch ${i + 1} was written successfully`);
       if (i === batches - 1) {
-        console.log(`Total CSV Writting Process of file:-${fileName} for brand id: ${brand_id} completed successfully on bucket: ${bucketName}`);
+        console.log(`Total CSV Writting Process of file:-${fileName} completed successfully`);
       }
     }
   } catch (err) {
     return console.log("Error in catch---", err);
   };
+
+
 }
 /**
- * This is the main function for CSV Task that calls batchProcessRecords() based upon conditional check on if bucket avaialble or not. if the bucket doesn't exists then it will first create a new bucket and then perform extraction job
- * 
- * @param {*} bucketName | The name of the bucket which needs to be used.
+ * This is the main function for CSV Task that calls batchProcessRecords() based upon conditional check on if bucket avaialble or not. if the bucket  doesn't exists then it will first create a new bucket and then perform extraction job
  */
-const exportDBRecords = async (bucketName = "", brand_id = "") => {
+const exportDBRecords = async () => {
   try {
+    const dataSet = "ampl";
+    const table = "mikmak_retailers";
+    const bucketName = "bucket-mikmak-data-project";
     const fileName = `mikmak-retailers_${moment().toISOString()}.csv`;
     const isBucket = await checkBucketExistence(bucketName);
     if (!isBucket) {
       const bucketAdded = await createBucket(bucketName);
       if (bucketAdded) {
-        await batchProcessRecords(bucketName, fileName, DB, TABLE, brand_id)
+        batchProcessRecords(bucketName, fileName, dataSet, table)
       }
     } else {
-      await batchProcessRecords(bucketName, fileName, DB, TABLE, brand_id)
+      batchProcessRecords(bucketName, fileName, dataSet, table)
     }
   } catch (err) {
     console.log("Error in catch---", err);
@@ -148,6 +139,25 @@ const checkFileExistence = async (bucketName = "", fileName = "") => {
     console.log("error occured during checking File Existence:-", error);
   }
 }
+
+/**
+ * This is the Helper Function to Create a File in Bucket
+ * @param {*} bucketName The name of google storage bucketin which file is needed to be created
+ * @param {*} fileName The name of file of that bucket to be created
+ * @param {*} content The content of the file to be written
+ */
+const createFile = async (bucketName = "", fileName = "", content = "") => {
+  try {
+    await storage.bucket(bucketName).file(fileName).save(content);
+
+    console.log(
+      `${fileName} with content ${content} uploaded to ${bucketName}.`
+    );
+
+  } catch (error) {
+    console.log("error while creating file:-", error);
+  }
+};
 const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = "") => {
   try {
     const isFile = await checkFileExistence(bucketName, fileName);
@@ -163,7 +173,75 @@ const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = ""
     console.log("error while uploading csv from memory :-", error);
   }
 }
+/**
+ * This is the Helper Function to update content in the file
+ * @param {*} bucketName The name of google storage bucket in which file is needed to be updated
+ * @param {*} fileName The name of file of that bucket to be updated
+ * @param {*} content The content of the file to be written
+ */
+const updateFile = async (bucketName = "", fileName = "", content = "") => {
+  try {
+    await storage.bucket(bucketName).file(fileName).delete();
+    await storage.bucket(bucketName).file(fileName).save(content);
+    console.log(`${fileName} updated`);
 
+  } catch (error) {
+    console.log("error while updating file:-", error);
+  }
+};
+/**
+ * This is the Helper Function to read file on Google Cloud Storage
+ * @param {*} bucketName The name of google storage bucket in which file is needed to be Read
+ * @param {*} fileName The name of file of that bucket to be updated
+ * @returns  null if file is empty and sliced string if file contains data 
+ */
+const readFile = async (bucketName = "", fileName = "") => {
+  try {
+    // Downloads the file into a buffer in memory.
+    const contents = await storage.bucket(bucketName).file(fileName).download();
+
+    console.log(`Contents of gs://${bucketName}/${fileName} are ${contents.toString()}`);
+    const index = contents.toString().indexOf("lastTimestamp=");
+    if (index >= 0) {
+      return contents.toString().slice(index + 14);
+    } else {
+      return null;
+    }
+
+  } catch (error) {
+    console.log("error while reading remote file:-", error);
+  }
+}
+/**
+ * This is the Helper Function which will perform task of calculating difference in last deploy and current deploy time of Google Cloud Function
+ * @param {*} isBucket  boolean value of if bucket exist on Google Cloud Storage
+ * @param {*} bucketName The name of google storage bucket  to be used
+ * @param {*} fileName The name of file in that bucket to be used 
+ * @param {*} content  The content to add in thatr file
+ * @param {*} context context of the executed Google Cloud Function
+ */
+const bucketCrud = async (isBucket = false, bucketName = "", fileName = "", content = "", context = "") => {
+  if (!isBucket) {
+    const bucketAdded = await createBucket(bucketName);
+    if (bucketAdded) {
+      await createFile(bucketName, fileName, content);
+    }
+  } else {
+    const isFile = await checkFileExistence(bucketName, fileName);
+    if (!isFile) {
+      await createFile(bucketName, fileName, content);
+    } else {
+      const oldContent = await readFile(bucketName, fileName);
+      if (oldContent) {
+        const diff = moment(oldContent).from(moment(context.timestamp))
+        console.log("Time Interval since last Trigger---", diff);
+      } else {
+        console.log(`This is the first time, Since ${fileName} file is created`);
+      }
+      await updateFile(bucketName, fileName, content);
+    }
+  }
+}
 /**
  * This is the main entery point of the application from where Google Cloud Function Starts its execution
  * @param {*} event  event of the executed Google Cloud Function
@@ -171,19 +249,16 @@ const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = ""
  */
 exports.main = async (event, context) => {
   try {
+    const bucketName = "bucket-mikmak-data-project";
+    const fileName = "logs.txt";
+    const content = `lastTimestamp=${context.timestamp}`
     const message = event.data
       ? Buffer.from(event.data, 'base64').toString()
       : 'Hello, World';
     console.log("message is---", message);
-    // const fileName = "logs.txt";
-    // const content = `lastTimestamp=${context.timestamp}`
-
-    // const isBucket = await checkBucketExistence(bucketName);
-    // await bucketCrud(isBucket, bucketName, fileName, content, context);
-    brands.map(async (brand) => {
-      const bucketName = brand.export_cloud_storage;
-      await exportDBRecords(bucketName, brand.brand_id);
-    });
+    const isBucket = await checkBucketExistence(bucketName);
+    await bucketCrud(isBucket, bucketName, fileName, content, context);
+    exportDBRecords();
   } catch (err) {
     console.log("Error in main--", err);
   }
