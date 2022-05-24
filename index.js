@@ -174,9 +174,9 @@ const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = ""
  */
 exports.main = async (event, context) => {
     try {
-        // const message = event.data
-        //   ? Buffer.from(event.data, 'base64').toString()
-        //   : 'Hello, World';
+        const message = event.data
+          ? Buffer.from(event.data, 'base64').toString()
+          : 'Hello, World';
         console.log("message is---", message);
         // const fileName = "logs.txt";
         // const content = `lastTimestamp=${context.timestamp}`
