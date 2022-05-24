@@ -1,3 +1,4 @@
 node_modules
 .env
 out.csv
+storage_key.json
