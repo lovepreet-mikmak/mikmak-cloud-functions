@@ -172,12 +172,12 @@ const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = ""
  * @param {*} event  event of the executed Google Cloud Function
  * @param {*} context context of the executed Google Cloud Function
  */
-(async (event, context) => {
+exports.main = async (event, context) => {
     try {
         // const message = event.data
         //   ? Buffer.from(event.data, 'base64').toString()
         //   : 'Hello, World';
-        // console.log("message is---", message);
+        console.log("message is---", message);
         // const fileName = "logs.txt";
         // const content = `lastTimestamp=${context.timestamp}`
 
@@ -190,4 +190,4 @@ const uploaadCSVFromMemory = async (bucketName = "", fileName = "", content = ""
     } catch (err) {
         console.log("Error in main--", err);
     }
-})();
+};
